@@ -163,7 +163,7 @@ const UserRegistration = () => {
 
     try {
       const response = await fetch(
-        "/onlineexam/api/user/register",
+        "https://localhost:8443/exam/api/user/register",
         {
           method: "POST",
           headers: {
