@@ -4,19 +4,13 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
+     historyApiFallback: true, 
     proxy: {
-      '/exam': {
+      '/exam/api': {
         target: 'https://localhost:8443',
         changeOrigin: true,
         secure: false
       }
     }
   },
-//  build: {
-//     rollupOptions: {
-//       input: {
-//         main: resolve(__dirname, 'index.html')
-//       }
-//     }
-//   }
 })
