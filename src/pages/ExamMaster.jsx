@@ -160,7 +160,6 @@ background: ${({ theme }) => theme.colors.background};
   padding: 12px 10px;
   border-bottom: 2px solid ${({ theme }) => theme.colors.border};
   border-right: 1px solid ${({ theme }) => theme.colors.border};
-
 `;
 
 const GridCell=styled.div`

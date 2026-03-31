@@ -28,15 +28,13 @@ const HeaderContainer = styled.div`
 
 const StyledNavLink = styled(NavLink)`
   text-decoration: none;
-  font-weight: 500;
   padding: 0.6rem 1rem;
-  font-size: 1rem;
-
-  color: ${({ theme }) => theme.colors.text};
-  background: transparent;
-  border-radius: 6px;
-  transition: 0.2s ease;
-
+font-size: 11px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.link};
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  border-radius:12px;
   &:hover {
     background-color: ${({ theme }) => theme.colors.primaryLight};
     color: ${({ theme }) => theme.colors.surface};
