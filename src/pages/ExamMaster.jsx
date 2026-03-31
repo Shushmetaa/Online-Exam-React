@@ -6,45 +6,29 @@ import ExamEmpty from "../component/ExamEmpty";
 import React from "react";
 
 export const ExamMain = styled.div`
-  display: flex;
+  // display: flex;
+  background: ${({ theme }) => theme.colors.background};
+  width:100vw;
 `;
 
 export const ExamForm = styled.div`
-  padding: 20px;
-  display: flex;
-  gap: 20px;
-  flex-direction: column;
-  align-items: center;
-  width: 120%;
+   max-width: ${({ theme }) => theme.maxWidth};
+  margin: 0 auto;
+  padding: 40px 32px;
+`;
+export const FormCard = styled.div`
+  background: ${({ theme }) => theme.colors.surface};
+  border-radius: 20px;
+  padding: 32px 36px;
+  box-shadow: ${({ theme }) => theme.colors.shadow};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  margin-bottom: 32px;
 
-  & span {
-    color: red;
+  form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 28px;
   }
-
-  & form {
-    display: flex;
-    flex-direction: column;
-    align-items:center;
-    gap: 25px;
-  }
-
-  & input,
-  & textarea {
-    border-radius: 5px;
-    border: 2px solid ${({ theme }) => theme.colors.border};
-    padding: 5px 20px;
-    width: 250px;
-    background: ${({ theme }) => theme.colors.surface};
-    color: ${({ theme }) => theme.colors.textlight};
-    font-family: inherit;
-    font-size: 14px;
-  }
-
-  & textarea {
-    height: 100px;
-    resize: vertical;
-  }
-
   & button {
     padding: 10px 20px;
     cursor: pointer;
@@ -54,6 +38,9 @@ export const ExamForm = styled.div`
     border-radius: 5px;
     transition: 0.2s;
     width:fit-content;
+     height: fit-content;    
+     align-self: end; 
+      margin-bottom: 4px; 
   }
 
   & button:hover {
@@ -61,66 +48,145 @@ export const ExamForm = styled.div`
   }
 `;
 
-export const FormRow = styled.div`
+export const FormCardTitle = styled.div`
   display: flex;
-  gap: 20px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+
+  span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: ${({ theme }) => theme.colors.primary};
+    display: inline-block;
+  }
+
+  h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: ${({ theme }) => theme.colors.textlight};
+    margin: 0;
+  }
+`;
+export const FormRow = styled.div`
+    display: flex;
+  flex-direction: column;
+  gap: 6px;
 
   & label {
-    width: 150px;
-    text-align: right;
-    font-size: 15px;
-    color: ${({ theme }) => theme.colors.textlight};
+    font-size: 11px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.primaryLight};
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+
+  span { color: #e05260; margin-left: 2px; }
   }
+   & input,
+  & textarea {
+       height: 44px;
+       padding: 0 16px;
+      border-radius: ${({ theme }) => theme.radius};
+       border: 1.5px solid ${({ theme }) => theme.colors.border};
+      background: ${({ theme }) => theme.colors.background};
+      font-size: 14px;
+      color: ${({ theme }) => theme.colors.textlight};
+      outline: none;
+      width: 100%;
+      box-sizing: border-box;
+
+       &::placeholder { color: ${({ theme }) => theme.colors.disabled};
+       }
+
+       &:focus {
+           border-color: ${({ theme }) => theme.colors.primary};
+           background: ${({ theme }) => theme.colors.surface};
+       }
+  }
+
+  & textarea {
+    height: 100px;
+   padding: 12px 16px;
+  }
+
 `;
 
 export const TableSection = styled.div`
-  width: 100%;
-  margin-top: 20px;
+  background: ${({ theme }) => theme.colors.surface};
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: ${({ theme }) => theme.colors.shadow};
+  border: 1px solid ${({ theme }) => theme.colors.border};
 `;
 
 export const TableHeader = styled.div`
   background: ${({ theme }) => theme.colors.primary};
-  color: white;
-  padding: 8px 16px;
-  font-size: 14px;
-  border-radius: 4px 4px 0 0;
-`;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: ${({ theme }) => theme.colors.background};
+  }
 
+  span {
+    font-size: 12px;
+    color: rgba(255,255,255,0.75);
+    background: rgba(255,255,255,0.12);
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+`;
+export const GridWrapper = styled.div`
+   overflow: auto;
+`;
 export const GridContainer = styled.div`
   display: grid;
-  grid-template-columns:
-    60px 120px 150px 200px 140px 120px 100px 150px 150px 120px;
-  border: 2px solid ${({ theme }) => theme.colors.border};
-  width: 100%;
+  grid-template-columns: 56px 80px 100px 1fr 130px 110px 90px 160px 140px 100px;
+  min-width: 1100px;
 `;
 
 export const GridHeader = styled.div`
-  background: ${({ theme }) => theme.colors.surface};
-  color: ${({ theme }) => theme.colors.textlight};
-  font-weight: 600;
-  padding: 8px;
-  border: 1px solid ${({ theme }) => theme.colors.border};
+background: ${({ theme }) => theme.colors.background};
+  color: ${({ theme }) => theme.colors.primaryLight};
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  padding: 12px 10px;
+  border-bottom: 2px solid ${({ theme }) => theme.colors.border};
+  border-right: 1px solid ${({ theme }) => theme.colors.border};
+
 `;
 
 const GridCell=styled.div`
-    padding: 8px 10px;
-//   border-right: ${({ theme }) => theme.colors.border};
-//   border-bottom: ${({ theme }) => theme.colors.border};
-   border: 1px solid ${({ theme }) => theme.colors.border};
+    padding: 12px 10px;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  border-right: 1px solid ${({ theme }) => theme.colors.border};
   font-size: 13px;
-  color:${({ theme }) => theme.colors.textlight};
+  color: ${({ theme }) => theme.colors.textlight};
   display: flex;
   align-items: center;
 `;
+
 export const ActionLink = styled.span`
-  color: ${({ theme }) => theme.colors.text};
-  font-size: 12px;
+ font-size: 11px;
+  font-weight: 600;
   cursor: pointer;
-  margin-right: 6px;
-  text-decoration: underline;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  color: ${({ theme }) => theme.colors.primary};
+  transition: background 0.15s, border-color 0.15s;
+  margin-right: 4px;
 
   &:hover {
-    color: red;
+    background: ${({ theme }) => theme.colors.link};
+    border-color: ${({ theme }) => theme.colors.border};
   }
 `;
 export default function ExamMaster(){
@@ -160,6 +226,8 @@ const [formData, setFormData] = useState({examId: '',
 }
  const [examList, setExamList] = useState([]);
   const fetchExams = async () => {
+    
+    
     try {
       const res = await fetch("/exam/api/admin/getExams", {
         method: "GET",
@@ -184,43 +252,48 @@ const [formData, setFormData] = useState({examId: '',
         <Layout>
             <ExamMain>
                 <ExamForm>
-                   <h2>Create Exam Here!</h2>
+                  <FormCard>
+                   <FormCardTitle>
+                     <span />
+                      <h3>Create New Exam</h3>
+                  </FormCardTitle>
                    <form onSubmit={createExam}>
-                    <FormRow>
-                    <label>Exam Id: <span>*</span></label>
-              <input type="text" name="examId" placeholder="Enter the Exam Id"  onChange={handleChange} 
-              /></FormRow>
           <FormRow>
               <label>Exam Name: <span>*</span></label>
-              <input type="text" name="examName" placeholder="Enter the Exam Name" onChange={handleChange}
+              <input type="text" name="examName" placeholder="e.g. Java Basics" onChange={handleChange}
               />
          </FormRow>
          <FormRow>
               <label>Description: <span>*</span></label>
-              <textarea name="description" placeholder="Enter the Description" onChange={handleChange} rows={4}
+              <textarea name="description" placeholder="Brief description of the exam..." onChange={handleChange} rows={4}
               />
         </FormRow>
         <FormRow>
               <label>No of Questions: <span>*</span></label>
-              <input type="number"  name="noOfQuestions"  placeholder="Enter No of Questions" onChange={handleChange}
+              <input type="number"  name="noOfQuestions"  placeholder="e.g. 50" onChange={handleChange}
               />
         </FormRow>
          <FormRow>
               <label>Duration: <span>*</span></label>
-              <input type="number" name="duration" placeholder="Enter Duration in Minutes" onChange={handleChange}
+              <input type="number" name="duration" placeholder="e.g. 90" onChange={handleChange}
               />
         </FormRow>
         <FormRow>
               <label>Pass Percentage: <span>*</span></label>
-              <input type="number" name="passPercentage" placeholder="Enter Pass Percentage" onChange={handleChange}
+              <input type="number" name="passPercentage" placeholder="e.g. 60" onChange={handleChange}
               />
               </FormRow>
               <button type="submit">Add Exam</button>
             </form>
+            </FormCard>
             <TableSection>
-                <TableHeader>Available Exams</TableHeader>
+                <TableHeader>
+                      <h3>Available Exams</h3>
+                      <span>{examList.length} exam{examList.length !== 1 ? 's' : ''}</span>
+                </TableHeader>
+                <GridWrapper>
             <GridContainer>
-               <GridHeader>Sl.No</GridHeader>
+               <GridHeader>S.No</GridHeader>
                <GridHeader>Exam ID</GridHeader>
                <GridHeader>Exam Name</GridHeader>
                <GridHeader>Description</GridHeader>
@@ -240,11 +313,11 @@ const [formData, setFormData] = useState({examId: '',
             <React.Fragment key={exam.examId}>
                    <GridCell>{index + 1}</GridCell>
                    <GridCell>{exam.examId}</GridCell>
-                   <GridCell>{exam.examName}</GridCell>
+                   <GridCell style={{ fontWeight: 600 }}>{exam.examName}</GridCell>
                    <GridCell>{exam.description}</GridCell>
                    <GridCell>{exam.noOfQuestions}</GridCell>
-                   <GridCell>{exam.duration}</GridCell>
-                   <GridCell>{exam.passPercentage}</GridCell>
+                   <GridCell>{exam.duration}min</GridCell>
+                   <GridCell>{exam.passPercentage}%</GridCell>
                    <GridCell>
                        <ActionLink>Add</ActionLink>
                        <ActionLink>Edit</ActionLink>
@@ -260,6 +333,7 @@ const [formData, setFormData] = useState({examId: '',
   ))
 )}
             </GridContainer>
+            </GridWrapper>
             </TableSection>
                 </ExamForm>
             </ExamMain>
