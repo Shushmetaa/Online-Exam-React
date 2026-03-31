@@ -6,7 +6,6 @@ import ExamEmpty from "../component/ExamEmpty";
 import React from "react";
 
 export const ExamMain = styled.div`
-  // display: flex;
   background: ${({ theme }) => theme.colors.background};
   width:100vw;
 `;
@@ -182,10 +181,11 @@ export const ActionLink = styled.span`
   color: ${({ theme }) => theme.colors.primary};
   transition: background 0.15s, border-color 0.15s;
   margin-right: 4px;
-
+  text-decoration:underline;
   &:hover {
     background: ${({ theme }) => theme.colors.link};
     border-color: ${({ theme }) => theme.colors.border};
+      text-decoration:none;
   }
 `;
 export default function ExamMaster(){
@@ -249,6 +249,7 @@ const [formData, setFormData] = useState({examId: '',
     return(
         <>
         <Layout>
+                  <Header></Header>
             <ExamMain>
                 <ExamForm>
                   <FormCard>

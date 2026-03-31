@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef } from "react";
 import styled from "styled-components";
 import Layout from "../component/layout";
 
@@ -101,8 +101,9 @@ const ButtonRow = styled.div`
   display: flex;
   justify-content: center;
   width: 100%;
+  gap:20px;
   margin-top: 10px;`;
-
+ 
 const Button = styled.button`
   padding: 10px 40px;
   cursor: pointer;
@@ -112,8 +113,7 @@ const Button = styled.button`
   border-radius: 5px;
   font-size: 16px;
   transition: 0.2s;
-
-  &:hover {
+   &:hover {
     background: ${({ theme }) => theme.colors.primaryDark};
   }
 `;
@@ -196,7 +196,30 @@ export default function QuestionMaster() {
       console.error(err);
     }
   };
+const fileInputRef = useRef(null);
 
+const handleUpload = async (e) => {
+  const file=e.target.files[0];
+  if(!file){
+    return;
+  }
+  const data = new FormData();
+  data.append("file", file);
+  try{
+    const res=await fetch("/exam/api/admin/excel/upload/10000",{
+      method:"POST",
+      body:data,
+    });
+    const result=await res.json();
+    if(result.responseMessage=="success"){
+      alert("Questions Uploaded Successfully!");
+    }else{
+      alert("Error:"+result._ERROR_MESSAGE_);
+    }
+  }catch(err){
+    console.log(err);
+  }
+};
   return (
     <Layout>
       <PageWrapper>
@@ -246,9 +269,13 @@ export default function QuestionMaster() {
                 </OptionBox>
               </Row>
             ))}
+            <input type="file"  accept=".xlsx, .xls" ref={fileInputRef} style={{ display: "none" }} onChange={handleUpload}/>
            <ButtonRow>
             <Button type="submit">Add Question</Button>
-            </ButtonRow>
+<Button type="button" onClick={() => fileInputRef.current.click()}>
+    Upload Excel
+  </Button>
+  </ButtonRow>
           </Form>
         </Container>
       </PageWrapper>
