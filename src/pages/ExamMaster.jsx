@@ -4,18 +4,20 @@ import { useState } from "react";
 import { useEffect } from "react";
 import ExamEmpty from "../component/ExamEmpty";
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import EditExamModal from "./EditExamModel";
 
-export const ExamMain = styled.div`
+const ExamMain = styled.div`
   background: ${({ theme }) => theme.colors.background};
   width:100vw;
 `;
 
-export const ExamForm = styled.div`
+const ExamForm = styled.div`
    max-width: ${({ theme }) => theme.maxWidth};
   margin: 0 auto;
   padding: 40px 32px;
 `;
-export const FormCard = styled.div`
+const FormCard = styled.div`
   background: ${({ theme }) => theme.colors.surface};
   border-radius: 20px;
   padding: 32px 36px;
@@ -47,7 +49,7 @@ export const FormCard = styled.div`
   }
 `;
 
-export const FormCardTitle = styled.div`
+const FormCardTitle = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
@@ -111,7 +113,7 @@ export const FormRow = styled.div`
 
 `;
 
-export const TableSection = styled.div`
+const TableSection = styled.div`
   background: ${({ theme }) => theme.colors.surface};
   border-radius: 20px;
   overflow: hidden;
@@ -119,7 +121,7 @@ export const TableSection = styled.div`
   border: 1px solid ${({ theme }) => theme.colors.border};
 `;
 
-export const TableHeader = styled.div`
+const TableHeader = styled.div`
   background: ${({ theme }) => theme.colors.primary};
   display: flex;
   align-items: center;
@@ -140,16 +142,16 @@ export const TableHeader = styled.div`
     border-radius: 20px;
   }
 `;
-export const GridWrapper = styled.div`
+const GridWrapper = styled.div`
    overflow: auto;
 `;
-export const GridContainer = styled.div`
+const GridContainer = styled.div`
   display: grid;
-  grid-template-columns: 56px 80px 100px 1fr 130px 110px 90px 160px 140px 100px;
+  grid-template-columns: 56px 140px 200px 100px 140px 120px 100px 120px 140px;
   min-width: 1100px;
 `;
 
-export const GridHeader = styled.div`
+const GridHeader = styled.div`
 background: ${({ theme }) => theme.colors.background};
   color: ${({ theme }) => theme.colors.primaryLight};
   font-size: 11px;
@@ -169,9 +171,10 @@ const GridCell=styled.div`
   color: ${({ theme }) => theme.colors.textlight};
   display: flex;
   align-items: center;
+
 `;
 
-export const ActionLink = styled.span`
+const ActionLink = styled.button`
  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
@@ -182,11 +185,17 @@ export const ActionLink = styled.span`
   transition: background 0.15s, border-color 0.15s;
   margin-right: 4px;
   text-decoration:underline;
+   background: none; 
   &:hover {
     background: ${({ theme }) => theme.colors.link};
     border-color: ${({ theme }) => theme.colors.border};
       text-decoration:none;
   }
+`;
+const EditExam=styled.div`
+   height:500px;
+   width:500px;
+   background-color:black;
 `;
 export default function ExamMaster(){
 
@@ -197,6 +206,7 @@ const [formData, setFormData] = useState({examId: '',
     duration: '',
     passPercentage: ''
   });
+  const navigate=useNavigate()
 
    const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -221,12 +231,14 @@ const [formData, setFormData] = useState({examId: '',
         }
     } catch (err) {
       console.error(err);
+   }finally{
+    navigate(0)
    }
 }
  const [examList, setExamList] = useState([]);
+ const [loading, setLoading] = useState(true);
   const fetchExams = async () => {
-    
-    
+    setLoading(true);
     try {
       const res = await fetch("/exam/api/admin/getExams", {
         method: "GET",
@@ -240,16 +252,19 @@ const [formData, setFormData] = useState({examId: '',
       }
     } catch (err) {
       console.error(err);
-    }
+    } finally {
+    setLoading(false);  
+  }
   };
    useEffect(() => {
     fetchExams();
   }, []);
 
+  const[editExam,setEditExam]=useState(null);
+  const[deleteExam,setDeleteExam]=useState(null);
     return(
         <>
         <Layout>
-                  <Header></Header>
             <ExamMain>
                 <ExamForm>
                   <FormCard>
@@ -294,25 +309,26 @@ const [formData, setFormData] = useState({examId: '',
                 <GridWrapper>
             <GridContainer>
                <GridHeader>S.No</GridHeader>
-               <GridHeader>Exam ID</GridHeader>
                <GridHeader>Exam Name</GridHeader>
                <GridHeader>Description</GridHeader>
                <GridHeader>No of Questions</GridHeader>
                <GridHeader>Duration</GridHeader>
                <GridHeader>Pass %</GridHeader>
-               <GridHeader>Questions</GridHeader>
+               <GridHeader>Topics</GridHeader>
+               <GridHeader>Exam</GridHeader>
                <GridHeader>Assign Users</GridHeader>
-               <GridHeader>Setup Exam</GridHeader>
-               {examList.length === 0 ? (                
-                  <ExamEmpty
-                    title={"Exam Is Not Added"}
-                    description={"Add your Exam to appear Here"}
-                  />
-                ) :  (
+              {loading ? (
+               <GridCell style={{ padding: "20px", justifyContent: "center" }}>
+                Loading...
+             </GridCell>) : examList.length === 0 ? (
+  <ExamEmpty
+    title={"Exam Is Not Added"}
+    description={"Add your Exam to appear Here"}
+  />
+) : (
   examList.map((exam, index) => (
             <React.Fragment key={exam.examId}>
                    <GridCell>{index + 1}</GridCell>
-                   <GridCell>{exam.examId}</GridCell>
                    <GridCell style={{ fontWeight: 600 }}>{exam.examName}</GridCell>
                    <GridCell>{exam.description}</GridCell>
                    <GridCell>{exam.noOfQuestions}</GridCell>
@@ -320,15 +336,14 @@ const [formData, setFormData] = useState({examId: '',
                    <GridCell>{exam.passPercentage}%</GridCell>
                    <GridCell>
                        <ActionLink>Add</ActionLink>
-                       <ActionLink>Edit</ActionLink>
-                       <ActionLink>Upload</ActionLink>
+                  </GridCell>
+                  <GridCell>
+                      <ActionLink onClick={()=>setEditExam(exam)}>Edit</ActionLink>
+                       <ActionLink onClick={()=>setDeleteExam(exam)}>Delete</ActionLink>
                   </GridCell>
                  <GridCell>
                      <ActionLink>Assign Users</ActionLink>
                 </GridCell>
-                <GridCell>
-                    <ActionLink>Set up</ActionLink>
-               </GridCell>
              </React.Fragment>
   ))
 )}
@@ -336,6 +351,8 @@ const [formData, setFormData] = useState({examId: '',
             </GridWrapper>
             </TableSection>
                 </ExamForm>
+                {editExam && (<EditExamModal exam={editExam} onClose={() => setEditExam(null)}onSuccess={fetchExams}/>
+)}
             </ExamMain>
         </Layout>
         </>

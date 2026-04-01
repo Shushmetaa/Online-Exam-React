@@ -126,7 +126,7 @@ const FooterText = styled.p`
   }
 `;
 
-const LoginPage = () => {
+export const LoginPage = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
