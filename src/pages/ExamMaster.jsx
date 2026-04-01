@@ -199,7 +199,7 @@ const EditExam=styled.div`
 `;
 export default function ExamMaster(){
 
-const [formData, setFormData] = useState({examId: '',
+const [formData, setFormData] = useState({
     examName: '',
     description: '',
     noOfQuestions: '',
