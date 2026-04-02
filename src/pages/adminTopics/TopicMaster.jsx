@@ -136,14 +136,15 @@ const FormInput = styled.input`
   font-size: 14px;
   font-family: inherit;
   color: ${({ theme }) => theme.colors.textlight};
-  background: #fafafa;
+  background: ${({ disabled }) => disabled ? '#f3f4f6' : '#fafafa'};
   outline: none;
   transition: all 0.2s ease;
+  cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'text'};
 
   &:focus {
-    background: white;
-    border-color: ${({ theme }) => theme.colors.primary};
-    box-shadow: 0 0 0 3px rgba(92, 53, 201, 0.15);
+    background: ${({ disabled }) => disabled ? '#f3f4f6' : 'white'};
+    border-color: ${({ theme, disabled }) => disabled ? 'rgba(0,0,0,0.08)' : theme.colors.primary};
+    box-shadow: ${({ disabled }) => disabled ? 'none' : '0 0 0 3px rgba(92, 53, 201, 0.15)'};
   }
 `;
 
@@ -232,12 +233,6 @@ const ErrorMsg = styled.p`
   margin-top: 8px;
 `;
 
-const SuccessMsg = styled.p`
-  color: green;
-  font-size: 12px;
-  margin-top: 8px;
-`;
-
 const TableHeader = styled.div`
   background: ${({ theme }) => theme.colors.primary};
   color: white;
@@ -289,7 +284,6 @@ const EmptyState = styled.p`
   font-size: 13px;
 `;
 
-// ✅ Warning bar for incomplete percentage
 const WarningBar = styled.div`
   margin: 12px 0 4px;
   padding: 10px 14px;
@@ -302,6 +296,20 @@ const WarningBar = styled.div`
   font-size: 13px;
   color: #b45309;
   font-weight: 600;
+`;
+
+const FullBar = styled.div`
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  background: #f0fdf4;
+  border-radius: 8px;
+  border: 1px solid #22c55e;
+  font-size: 13px;
+  color: #15803d;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `;
 
 const ModalOverlay = styled.div`
@@ -425,11 +433,11 @@ const PurpleBtn = styled.button`
   &:hover { opacity: 0.9; }
 `;
 
-const SsCircleRed = styled.div`
+const SsCircle = styled.div`
   width: 58px;
   height: 58px;
   border-radius: 50%;
-  background: #c62828;
+  background: ${({ color }) => color || '#c62828'};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -446,30 +454,51 @@ const SsCircleRed = styled.div`
   }
 `;
 
+const AddBtn = styled.button`
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  margin-right: 5px;
+  background: #e3f2fd;
+  color: #1976d2;
+`;
+
 export function TopicMaster() {
 
-    const [exam, setExam] = useState([]);
-    const [selectedExam, setSelectedExam] = useState(null);
-    const [selectedExamId, setSelectedExamId] = useState("");
-    const [totalPct, setTotalPct] = useState(0);
-    const [topicList, setTopicList] = useState([]);
-    const [errorMsg, setErrorMsg] = useState("");
-    const [successMsg, setSuccessMsg] = useState("");
-    const [topicData, setTopicData] = useState({
-        topicId: '',
-        topicName: '',
-        percentage: '',
-        topicPassPercentage: ''
+    const [exam, setExam]                           = useState([]);
+    const [selectedExam, setSelectedExam]           = useState(null);
+    const [selectedExamId, setSelectedExamId]       = useState("");
+    const [totalPct, setTotalPct]                   = useState(0);
+    const [topicList, setTopicList]                 = useState([]);
+    const [errorMsg, setErrorMsg]                   = useState("");
+    const [topicData, setTopicData]                 = useState({
+        topicId: '', topicName: '', percentage: '', topicPassPercentage: ''
     });
-    const [tempTopics, setTempTopics] = useState([]);
-    const [editModalOpen, setEditModalOpen] = useState(false);
-    const [selectedTopic, setSelectedTopic] = useState(null);
-
-    // delete state
+    const [tempTopics, setTempTopics]               = useState([]);
+    const [editModalOpen, setEditModalOpen]         = useState(false);
+    const [selectedTopic, setSelectedTopic]         = useState(null);
     const [deleteTarget, setDeleteTarget]           = useState(null);
     const [deleteLoading, setDeleteLoading]         = useState(false);
     const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
     const [deletedTopicName, setDeletedTopicName]   = useState('');
+    const [showSaveSuccess, setShowSaveSuccess]     = useState(false); // ✅ new
+
+    const tempTotal    = tempTopics.reduce((sum, t) => sum + t.percentage, 0);
+    const totalUsed    = topicList.reduce((sum, t) => sum + parseFloat(t.percentage || 0), 0) + tempTotal;
+    const newTotal     = tempTotal + parseFloat(topicData.percentage || 0);
+    const isHundredPct = Math.round(totalUsed) >= 100;
+
+    const isSaveDisabled = isHundredPct || newTotal > 100 ||
+                           !topicData.topicId || !topicData.topicName ||
+                           !topicData.percentage || !topicData.topicPassPercentage;
+
+    const questionsPerExam = Math.round(
+        (parseFloat(topicData.percentage || 0) / 100) * (selectedExam?.noOfQuestions || 0)
+    );
 
     const handleEditClick = (topic) => {
         setSelectedTopic(topic);
@@ -490,7 +519,6 @@ export function TopicMaster() {
         setTopicList([]);
         setTempTopics([]);
         setErrorMsg("");
-        setSuccessMsg("");
     };
 
     const handleTopicChange = (e) => {
@@ -501,27 +529,25 @@ export function TopicMaster() {
     const handleAddTopic = () => {
         const pct = parseFloat(topicData.percentage || 0);
 
+        if (isHundredPct) {
+            setErrorMsg("Total percentage is already 100%. Delete a topic to add a new one.");
+            return;
+        }
         if (!topicData.topicId || !topicData.topicName || !pct || !topicData.topicPassPercentage) {
             setErrorMsg("Please fill all fields");
             return;
         }
-
         const total = tempTopics.reduce((sum, t) => sum + t.percentage, 0) + pct;
-
         if (total > 100) {
             setErrorMsg("Total percentage cannot exceed 100%");
             return;
         }
 
-        const questions = Math.round((pct / 100) * selectedExam.noOfQuestions);
-
-        let lastEndingQid = 0;
-        const allTopics = [...topicList, ...tempTopics].sort((a, b) => a.endingQid - b.endingQid);
-        if (allTopics.length > 0) {
-            lastEndingQid = allTopics[allTopics.length - 1].endingQid;
-        }
-        const startingQid = lastEndingQid + 1;
-        const endingQid   = startingQid + questions - 1;
+        const questions     = Math.round((pct / 100) * selectedExam.noOfQuestions);
+        const allTopics     = [...topicList, ...tempTopics].sort((a, b) => a.endingQid - b.endingQid);
+        const lastEndingQid = allTopics.length > 0 ? allTopics[allTopics.length - 1].endingQid : 0;
+        const startingQid   = lastEndingQid + 1;
+        const endingQid     = startingQid + questions - 1;
 
         const newTopic = {
             ...topicData,
@@ -554,7 +580,9 @@ export function TopicMaster() {
             const data = await res.json();
             if (data.responseMessage === "success") {
                 setTopicList(data.topicList);
-                const total = data.topicList.reduce((sum, t) => sum + parseFloat(t.percentage || 0), 0);
+                const total = data.topicList.reduce(
+                    (sum, t) => sum + parseFloat(t.percentage || 0), 0
+                );
                 setTotalPct(total);
             }
         } catch (error) {
@@ -567,7 +595,6 @@ export function TopicMaster() {
             setErrorMsg("No topics to save.");
             return;
         }
-
         try {
             for (const topic of tempTopics) {
                 const params = new URLSearchParams();
@@ -586,10 +613,9 @@ export function TopicMaster() {
                     body: params
                 });
             }
-
-            setSuccessMsg("All topics saved successfully!");
             setTempTopics([]);
-            fetchTopics(selectedExamId);
+            await fetchTopics(selectedExamId); 
+            setShowSaveSuccess(true);          
 
         } catch (err) {
             console.log(err);
@@ -611,12 +637,16 @@ export function TopicMaster() {
                 body: params
             });
 
-            // ✅ instantly remove from table
-            setTopicList(prev => prev.filter(t => t.topicId !== deleteTarget.topicId));
-            setTotalPct(prev => prev - parseFloat(deleteTarget.percentage || 0));
+            const updatedList = topicList.filter(t => t.topicId !== deleteTarget.topicId);
+            setTopicList(updatedList);
+            const newTotalPct = updatedList.reduce(
+                (sum, t) => sum + parseFloat(t.percentage || 0), 0
+            );
+            setTotalPct(newTotalPct);
             setDeletedTopicName(deleteTarget.topicName);
             setDeleteTarget(null);
             setShowDeleteSuccess(true);
+            setErrorMsg("");
 
         } catch (err) {
             console.log(err);
@@ -628,17 +658,10 @@ export function TopicMaster() {
     const clearForm = () => {
         setTopicData({ topicId: '', topicName: '', percentage: '', topicPassPercentage: '' });
         setErrorMsg("");
-        setSuccessMsg("");
     };
 
     useEffect(() => { fetchExams(); }, []);
     useEffect(() => { if (selectedExamId) fetchTopics(selectedExamId); }, [selectedExamId]);
-
-    const tempTotal        = tempTopics.reduce((sum, t) => sum + t.percentage, 0);
-    const newTotal         = tempTotal + parseFloat(topicData.percentage || 0);
-    const totalUsed        = totalPct + tempTotal;
-    const isSaveDisabled   = newTotal > 100 || !topicData.topicId || !topicData.topicName || !topicData.percentage || !topicData.topicPassPercentage;
-    const questionsPerExam = Math.round((parseFloat(topicData.percentage || 0) / 100) * (selectedExam?.noOfQuestions || 0));
 
     return (
         <Layout>
@@ -667,7 +690,7 @@ export function TopicMaster() {
                             <ExamInfoItem>
                                 <span>Exam ID</span>
                                 <span>{selectedExam.examId}</span>
-                            </ExamInfoItem>
+                            </ExamInfoItem> 
                             <ExamInfoItem>
                                 <span>Total Questions</span>
                                 <span>{selectedExam.noOfQuestions}</span>
@@ -686,38 +709,56 @@ export function TopicMaster() {
                             <Card>
                                 <CardTitle>Add New Topic</CardTitle>
 
+                                {isHundredPct && (
+                                    <FullBar>
+                                        ✅ 100% allocated — all topics are set.
+                                    </FullBar>
+                                )}
+
                                 <form>
                                     <FormRow>
                                         <FormGroup>
                                             <FormLabel>Topic ID *</FormLabel>
-                                            <FormInput type="text" name="topicId"
+                                            <FormInput
+                                                type="text" name="topicId"
                                                 value={topicData.topicId}
                                                 onChange={handleTopicChange}
-                                                placeholder="e.g. T001" />
+                                                placeholder="e.g. T001"
+                                                disabled={isHundredPct || selectedTopic !== null}
+                                            />
                                         </FormGroup>
                                         <FormGroup>
                                             <FormLabel>Topic Name *</FormLabel>
-                                            <FormInput type="text" name="topicName"
+                                            <FormInput
+                                                type="text" name="topicName"
                                                 value={topicData.topicName}
                                                 onChange={handleTopicChange}
-                                                placeholder="e.g. Core Java" />
+                                                placeholder="e.g. Core Java"
+                                                disabled={isHundredPct}
+                                            />
                                         </FormGroup>
                                     </FormRow>
 
                                     <FormRow>
                                         <FormGroup>
                                             <FormLabel>Percentage (%) *</FormLabel>
-                                            <FormInput type="number" name="percentage"
+                                            <FormInput
+                                                type="number" name="percentage"
                                                 value={topicData.percentage}
                                                 onChange={handleTopicChange}
-                                                placeholder="e.g. 30" />
+                                                placeholder="e.g. 30"
+                                                disabled={isHundredPct}
+                                            />
                                         </FormGroup>
                                         <FormGroup>
                                             <FormLabel>Topic Pass % *</FormLabel>
-                                            <FormInput type="number" name="topicPassPercentage"
+                                            <FormInput
+                                                type="number" name="topicPassPercentage"
                                                 value={topicData.topicPassPercentage}
                                                 onChange={handleTopicChange}
-                                                placeholder="e.g. 50" />
+                                                placeholder="e.g. 50"
+                                                disabled={isHundredPct}
+                                            />
                                         </FormGroup>
                                     </FormRow>
 
@@ -729,10 +770,12 @@ export function TopicMaster() {
                                         <span>QID Range:</span>
                                         <span>
                                             {(() => {
-                                                const allTopics = [...topicList, ...tempTopics].sort((a, b) => a.endingQid - b.endingQid);
-                                                const lastEnd   = allTopics.length > 0 ? allTopics[allTopics.length - 1].endingQid : 0;
-                                                const start     = lastEnd + 1;
-                                                const end       = start + questionsPerExam - 1;
+                                                const allTopics = [...topicList, ...tempTopics]
+                                                    .sort((a, b) => a.endingQid - b.endingQid);
+                                                const lastEnd = allTopics.length > 0
+                                                    ? allTopics[allTopics.length - 1].endingQid : 0;
+                                                const start = lastEnd + 1;
+                                                const end   = start + questionsPerExam - 1;
                                                 return `${start} - ${end}`;
                                             })()}
                                         </span>
@@ -749,11 +792,13 @@ export function TopicMaster() {
                                     </ProgressWrap>
 
                                     {newTotal > 100 && <ErrorMsg>Total % exceeds 100!</ErrorMsg>}
-                                    {errorMsg   && <ErrorMsg>{errorMsg}</ErrorMsg>}
-                                    {successMsg && <SuccessMsg>{successMsg}</SuccessMsg>}
+                                    {errorMsg && <ErrorMsg>{errorMsg}</ErrorMsg>}
 
                                     <BtnRow>
-                                        <SaveBtn type="button" disabled={isSaveDisabled} onClick={handleAddTopic}>
+                                        <SaveBtn
+                                            type="button"
+                                            disabled={isSaveDisabled}
+                                            onClick={handleAddTopic}>
                                             Save Topic
                                         </SaveBtn>
                                         <SaveBtn type="button" onClick={handleSaveAll}>
@@ -777,7 +822,7 @@ export function TopicMaster() {
                                         <StyledTable>
                                             <thead>
                                                 <tr>
-                                                    <Th>Exam ID</Th>
+                                                    {/* <Th>Exam ID</Th> */}
                                                     <Th>Topic ID</Th>
                                                     <Th>Topic Name</Th>
                                                     <Th>%</Th>
@@ -791,7 +836,7 @@ export function TopicMaster() {
                                             <tbody>
                                                 {[...tempTopics, ...topicList].map((topic) => (
                                                     <tr key={topic.topicId}>
-                                                        <Td>{topic.examId}</Td>
+                                                        {/* <Td>{topic.examId}</Td> */}
                                                         <Td>{topic.topicId}</Td>
                                                         <Td>{topic.topicName}</Td>
                                                         <Td>{topic.percentage}%</Td>
@@ -800,16 +845,22 @@ export function TopicMaster() {
                                                         <Td>{topic.endingQid}</Td>
                                                         <Td>{topic.topicPassPercentage}%</Td>
                                                         <Td>
-                                                            <ActionBtn variant="edit" onClick={() => handleEditClick(topic)}>Edit</ActionBtn>
-                                                            <ActionBtn variant="delete" onClick={() => setDeleteTarget(topic)}>Delete</ActionBtn>
+                                                            <AddBtn>Add</AddBtn>
+                                                            <ActionBtn variant="edit"
+                                                                onClick={() => handleEditClick(topic)}>
+                                                                Edit
+                                                            </ActionBtn>
+                                                            <ActionBtn variant="delete"
+                                                                onClick={() => setDeleteTarget(topic)}>
+                                                                Delete
+                                                            </ActionBtn>
                                                         </Td>
                                                     </tr>
                                                 ))}
                                             </tbody>
                                         </StyledTable>
 
-                                        {/* ✅ Warning shown when total % is not 100 */}
-                                        {topicList.length > 0 && Math.round(totalPct) !== 100 && (
+                                        {topicList.length > 0 && tempTopics.length === 0 && Math.round(totalPct) !== 100 && (
                                             <WarningBar>
                                                 ⚠️ Total topic percentage is {Math.round(totalPct)}% — must equal 100% before exam can be used.
                                             </WarningBar>
@@ -832,12 +883,14 @@ export function TopicMaster() {
                 onUpdate={fetchTopics}
             />
 
+            {/* Delete confirm modal */}
             {deleteTarget && !showDeleteSuccess && (
                 <ModalOverlay>
                     <SmallModal>
                         <SmBody>
                             <SmIconDanger>
-                                <svg viewBox="0 0 24 24" fill="none" stroke="#c62828" strokeWidth="2" strokeLinecap="round">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="#c62828"
+                                    strokeWidth="2" strokeLinecap="round">
                                     <polyline points="3 6 5 6 21 6" />
                                     <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
                                     <path d="M10 11v6M14 11v6" />
@@ -850,7 +903,9 @@ export function TopicMaster() {
                             <SmDesc>This action <strong>cannot be undone</strong>.</SmDesc>
                         </SmBody>
                         <SmFooter>
-                            <GhostBtn onClick={() => setDeleteTarget(null)} disabled={deleteLoading}>Cancel</GhostBtn>
+                            <GhostBtn onClick={() => setDeleteTarget(null)} disabled={deleteLoading}>
+                                Cancel
+                            </GhostBtn>
                             <DangerBtn onClick={handleConfirmDelete} disabled={deleteLoading}>
                                 {deleteLoading ? 'Deleting...' : 'Yes, Delete'}
                             </DangerBtn>
@@ -859,13 +914,16 @@ export function TopicMaster() {
                 </ModalOverlay>
             )}
 
+            {/* Delete success modal */}
             {showDeleteSuccess && (
                 <ModalOverlay>
                     <SmallModal>
                         <SmBody>
-                            <SsCircleRed>
-                                <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" /></svg>
-                            </SsCircleRed>
+                            <SsCircle color="#c62828">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M5 13l4 4L19 7" />
+                                </svg>
+                            </SsCircle>
                             <SmTitle>Topic Deleted!</SmTitle>
                             <SmDesc>
                                 {deletedTopicName} has been removed successfully.
@@ -874,6 +932,29 @@ export function TopicMaster() {
                         </SmBody>
                         <SmFooter>
                             <PurpleBtn onClick={() => setShowDeleteSuccess(false)}>Close</PurpleBtn>
+                        </SmFooter>
+                    </SmallModal>
+                </ModalOverlay>
+            )}
+
+            {/* ✅ Save all success modal */}
+            {showSaveSuccess && (
+                <ModalOverlay>
+                    <SmallModal>
+                        <SmBody>
+                            <SsCircle color="#22c55e">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M5 13l4 4L19 7" />
+                                </svg>
+                            </SsCircle>
+                            <SmTitle>Topics Saved!</SmTitle>
+                            <SmDesc>
+                                All topics have been saved successfully.
+                                The topic list has been updated.
+                            </SmDesc>
+                        </SmBody>
+                        <SmFooter>
+                            <PurpleBtn onClick={() => setShowSaveSuccess(false)}>Done</PurpleBtn>
                         </SmFooter>
                     </SmallModal>
                 </ModalOverlay>

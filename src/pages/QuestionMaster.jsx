@@ -269,7 +269,7 @@ const handleUpload = async (e) => {
                 </OptionBox>
               </Row>
             ))}
-            <input type="file"  accept=".xlsx, .xls" ref={fileInputRef} style={{ display: "none" }} onChange={handleUpload}/>
+            <input type="file"  accept=".xlsx, .xls" ref={fileInputRef}  onChange={handleUpload}/>
            <ButtonRow>
             <Button type="submit">Add Question</Button>
 <Button type="button" onClick={() => fileInputRef.current.click()}>
