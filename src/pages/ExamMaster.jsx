@@ -110,8 +110,20 @@ export const FormRow = styled.div`
     height: 100px;
    padding: 12px 16px;
   }
-
+ & select {
+  height: 44px ;
+  padding: 0 16px !important;
+  border-radius: ${({ theme }) => theme.radius} !important;
+  border: 1.5px solid ${({ theme }) => theme.colors.border} !important;
+  background: ${({ theme }) => theme.colors.background} !important;
+  font-size: 14px;
+  color: ${({ theme }) => theme.colors.textlight};
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+  box-sizing: border-box;
 `;
+
 
 const TableSection = styled.div`
   background: ${({ theme }) => theme.colors.surface};
