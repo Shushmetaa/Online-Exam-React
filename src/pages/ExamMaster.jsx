@@ -108,7 +108,18 @@ export const FormRow = styled.div`
     height: 100px;
    padding: 12px 16px;
   }
-
+  & select {
+  height: 44px ;
+  padding: 0 16px !important;
+  border-radius: ${({ theme }) => theme.radius} !important;
+  border: 1.5px solid ${({ theme }) => theme.colors.border} !important;
+  background: ${({ theme }) => theme.colors.background} !important;
+  font-size: 14px;
+  color: ${({ theme }) => theme.colors.textlight};
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+  box-sizing: border-box;
 `;
 
 export const TableSection = styled.div`
@@ -309,7 +320,7 @@ const [formData, setFormData] = useState({examId: '',
                     description={"Add your Exam to appear Here"}
                   />
                 ) :  (
-  examList.map((exam, index) => (
+              examList.map((exam, index) => (
             <React.Fragment key={exam.examId}>
                    <GridCell>{index + 1}</GridCell>
                    <GridCell>{exam.examId}</GridCell>
